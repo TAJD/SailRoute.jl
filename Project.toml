@@ -3,6 +3,12 @@ uuid = "115e5196-f809-57df-8580-7a2e8d592fff"
 authors = ["td7g11@soton.ac.uk <tom0dickson@gmail.com>"]
 version = "0.1.0"
 
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 

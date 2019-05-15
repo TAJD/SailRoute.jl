@@ -1,5 +1,8 @@
+using PyCall, Interpolations
+
 module sail_route
 
-greet() = print("Hello World!")
+include("weather/load_weather.jl")
+include("performance/polar.jl")
 
 end # module
