@@ -1,0 +1,10 @@
+name = "sail_route"
+uuid = "115e5196-f809-57df-8580-7a2e8d592fff"
+authors = ["td7g11@soton.ac.uk <tom0dickson@gmail.com>"]
+version = "0.1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
