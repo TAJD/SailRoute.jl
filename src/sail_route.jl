@@ -3,7 +3,8 @@ using PyCall, Interpolations
 module sail_route
 
 export
-	generate_performance
+	generate_performance,
+	awa
 
 include("uncertainty/discretization_error.jl")
 include("uncertainty/distributed_utils.jl")

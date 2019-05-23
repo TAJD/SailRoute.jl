@@ -1,4 +1,4 @@
-using Dates, PyCall
+using Dates, PyCall, Formatting
 
 dt = pyimport("datetime")
 
@@ -77,38 +77,13 @@ end
     return Dates.Hour(mm*3.0)
 end
 
-
-function generate_inputs(route, wisp, widi, wadi, wahi)
-    y_dist = haversine(route.lon1, route.lon2, route.lat1, route.lat2)[1]/(route.y_nodes+1) # in nm
-    x, y = co_ordinates(route.lon1, route.lon2, route.lat1, route.lat2,
-                        route.x_nodes, route.y_nodes, y_dist)
-    wisp = regrid_domain(wisp, x, y)
-    widi = regrid_domain(widi, x, y)
-    wadi = regrid_domain(wadi, x, y)
-    wahi = regrid_domain(wahi, x, y)
-    return x, y, wisp, widi, wadi, wahi
-end
-
-
-function generate_inputs(route::Route, wisp, widi, wadi, wahi, cusp, cudi)
-    y_dist = haversine(route.lon1, route.lon2, route.lat1, route.lat2)[1]/(route.y_nodes+1) # in nm
-    x, y = co_ordinates(route.lon1, route.lon2, route.lat1, route.lat2,
-                        route.x_nodes, route.y_nodes, y_dist)
-    wisp = regrid_domain(wisp, x, y)
-    widi = regrid_domain(widi, x, y)
-    wadi = regrid_domain(wadi, x, y)
-    wahi = regrid_domain(wahi, x, y)
-    cusp = regrid_domain(cusp, x, y)
-    cudi = regrid_domain(cudi, x, y)
-    return x, y, wisp, widi, wadi, wahi, cusp, cudi
+function print_env(wisp, widi, wahi, wadi, cusp, cudi, sp)
+    printfmt("Wisp {1:.2f} Widi {2:.2f} Wahi {3:.2f} Wadi {4:.2f} Cusp {5:.2f} Cudi {6:.2f} Bsp {7:.2f} \n", wisp, widi, wahi, wadi, cusp, cudi, sp)
 end
 
 
 "Time dependent shortest path."
-function route_solve(route::Route, performance::Performance, start_time::DateTime, times, x, y,
-                     wisp, widi,
-                     wadi, wahi,
-                     cusp, cudi)
+function route_solve(route::Route, performance::Performance, start_time::DateTime, times, x, y, wisp, widi, wadi, wahi, cusp, cudi)
     start_time_idx = time_to_index(start_time, times)
     earliest_times = fill(Inf, size(x))
     prev_node = zero(x)
@@ -136,8 +111,6 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
                               wadi_int, wahi_int, b)
         if speed != Inf
             earliest_times[1, idx] = d/speed
-        else
-            earliest_times[1, idx] = Inf
         end
     end
     @inbounds for idy in 1:idy_range-1

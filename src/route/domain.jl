@@ -66,21 +66,6 @@ euclidean(0.0, 0.0, 10.0, 10.0) = (14.142135623730951, 45.0)
 end
 
 
-"""
-    co_ordinates(start_long, finish_long, start_lat, finish_lat,
-                 n_ranks, n_nodes, dist)
-
-Return the co-ordinates of each point across the discretized domain.
-"""
-function co_ordinates(start_long, finish_long, start_lat, finish_lat,
-                      n_ranks::Int, n_nodes::Int, dist)
-    x, y = pd.return_co_ords(start_long, finish_long, start_lat,
-                                    finish_lat, n_ranks, n_nodes,
-                                    dist)
-    return x, y
-end
-
-
 """Calculate the number of nodes for a specific distance in nm."""
 function calc_nodes(lon1, lon2, lat1, lat2, req_d)
     d = haversine(lon1, lon2, lat1, lat2)[1]
