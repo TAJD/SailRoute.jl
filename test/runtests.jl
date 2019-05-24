@@ -1,6 +1,8 @@
-using sail_route
-using Test
+#!/usr/bin/env julia
 
-@testset "sail_route.jl" begin
-    # Write your own tests here.
-end
+
+using sail_route, Test, SafeTestsets
+println("Starting tests")
+
+
+@time @safetestset "Polar tests" begin include("test_polar.jl") end

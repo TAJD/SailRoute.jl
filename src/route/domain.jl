@@ -1,15 +1,3 @@
-using PyCall
-
-machinery = pyimport("importlib.machinery")
-loader = machinery.SourceFileLoader("pydomain",ENV["HOME"]*"/sail_route_old/src/route/pydomain.py")
-pd = loader.load_module("pydomain")
-
-
-"""Calculate the minimum distance between two angles."""
-@inline @fastmath function min_angle(a, b)
-    abs(mod(a - b + 180.0, 360.0) - 180.0)
-end
-
 
 """
     haversine(lon1, lat1, lon2, lat2)

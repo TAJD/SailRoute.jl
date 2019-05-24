@@ -1,4 +1,4 @@
-using CSV, Interpolations, DataFrames, Roots, Formatting, JuMP, Ipopt
+using CSV, Interpolations, DataFrames, Roots, Formatting, JuMP, Ipopt, Cbc
 
 """
     awa(twa, v_s, v_t)
@@ -62,7 +62,6 @@ function setup_perf_interpolation(tws, twa, perf)
     knots = (twa, tws)
     itp = interpolate(knots, perf, Gridded(Linear()))
     etp0 = extrapolate(itp, Line())
-    #etp0 = extrapolate(itp, 0.0)
     return etp0
 end
 
@@ -73,36 +72,16 @@ functionterp(itp, twa, tws)
 Return interpolated performance. Convert from ms to knots here.
 """
 @inline @fastmath function perf_interp(performance::Performance, twa, tws)
-    return performance.polar(twa, tws*1.94384)
+    if twa < performance.polar.itp.knots[1][1]
+        return 0.0
+    else
+        return performance.polar(twa, tws*1.94384)
+    end 
 end
 
 """Calculate the minimum distance between two angles."""
-@fastmath function min_angle(a, b)
+@inline @fastmath function min_angle(a, b)
     return abs(atand(sind(a-b), cosd(a-b)))
-end
-
-
-
-"""Check if the awa suggested is within the possible values for awa from the polar data."""
-@inline @fastmath function check_brackets(bearing, twa)
-    awa = min_angle(bearing, twa[1])
-    heading_awa = awa
-    max_awa = 170.0
-    min_awa = 20.0
-    max_awa_delta = max_awa - awa
-    min_awa_delta = awa - min_awa
-    delta = 0.0
-    if min_awa_delta < 0 && max_awa_delta > 0
-        bearing -= min_awa_delta 
-    elseif min_awa_delta < 0 && max_awa_delta < 0
-        bearing += max_awa_delta
-    end
-    return mod(bearing, 360.0)
-end
-
-function print_perf_calcs(w_c_sp, w_c_di, v_init, low_bear, high_bear)
-    printfmt("w_c_sp: {1:.2f} w_c_di: {2:.2f} Bsp_init: {3:.2f}\n", w_c_sp, w_c_di, v_init)
-    printfmt("low_bear: {1:.2f}, high_bear: {2:.2f}\n", low_bear, high_bear)
 end
 
 
@@ -113,10 +92,6 @@ function typical_aerrtsen()
     return etp
 end
 
-
-function print_perf(awa, tws, v)
-    printfmt("AWA = {1:.2f}, TWS = {2:.2f}, v = {3:.2f}\n", awa, tws, v)
-end
 
 @inline @fastmath wwd_to_md(x)=mod2pi(deg2rad(270.0-x))
 @inline @fastmath md_to_wwd(x)=mod(rad2deg(x)-270.0, 360.0)
@@ -164,100 +139,18 @@ function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     return p(value.(ϕ))
 end
 
-"""
-cost_function_canoe(performance, cudi::Float64, cusp::Float64,
-                       widi::Float64, wisp::Float64,
-                       wadi::Float64, wahi::Float64,
-                       bearing::Float64)
-
-
-Calculate the speed of the sailing craft given the failure model and environmental conditions. Don't forget the rename function below! 
-"""
-function cost_function_canoe(performance::Performance,
-                       cudi, cusp,
-                       widi, wisp,
-                       wadi, wahi,
-                       bearing)
-    w_c_di = mod(widi + cudi, 360.0)
-    w_c_sp = wisp + cusp
-    v = perf_interp(performance, min_angle(w_c_di, bearing), w_c_sp, wahi, wadi)
-    resultant(x) = hor_result(performance, w_c_di, w_c_sp, wahi, wadi, cudi, cusp, bearing, x)
-    low_bearing = check_brackets(bearing-45.0, w_c_di)
-    high_bearing = check_brackets(bearing+45.0, w_c_di)
-    try 
-        phi = find_zero(resultant, (low_bearing, high_bearing), xatol=0.1)
-        v = perf_interp(performance, min_angle(w_c_di, phi), w_c_sp, wahi, wadi)
-        if v + cusp < 0.0  # if the speed is less than 0 then it is going backwards - return 0 
-            return 0.0
-        elseif (min_angle(bearing, wadi) < 40.0) && (wahi > 0.2)
-            return 0.5*(v+cusp) # reduce the speed by half if heading into waves
-        else
-            return v + cusp
-        end
-    catch ArgumentError
-        return 0.0
-    end
-    print_perf_calcs(w_c_sp, w_c_di, v_init, resultant_0, low_bear, high_bear)
-end
-
 
 """
 Function to return speed without considering current.
 """
-function cost_function_test(performance, cudi::Float64, cusp::Float64, widi::Float64, wisp::Float64,
-                            wadi::Float64, wahi::Float64, bearing::Float64)
+function cost_function(performance, cudi::Float64, cusp::Float64, widi::Float64, wisp::Float64, wadi::Float64, wahi::Float64, bearing::Float64)
     return solve_speed_given_current(wisp, widi, cusp, cudi, bearing, performance)
 end
-
-
-
-"""
-cost_function_conventional(performance, cudi::Float64, cusp::Float64,
-                       widi::Float64, wisp::Float64,
-                       wadi::Float64, wahi::Float64,
-                       bearing::Float64)
-
-
-Calculate the speed of the sailing craft given the failure model and environmental conditions. Don't forget the rename function below! 
-"""
-function cost_function_conventional(performance::Performance,
-                       cudi, cusp,
-                       widi, wisp,
-                       wadi, wahi,
-                       bearing)
-    w_c_di = mod(widi + cudi, 360.0)
-    w_c_sp = wisp + cusp
-    v = perf_interp(performance, min_angle(w_c_di, bearing), w_c_sp, wahi, wadi)
-   # println("W_c_di: ", w_c_di)
-   # println("bearing: ", bearing)
-   # println("AWA: ", min_angle(w_c_di, bearing))
-    resultant(x) = hor_result(performance, w_c_di, w_c_sp, wahi, wadi, cudi, cusp, bearing, x)
-    low_bearing = check_brackets(bearing-45.0, w_c_di)
-    high_bearing = check_brackets(bearing+45.0, w_c_di)
-    print_perf_calcs(w_c_sp, w_c_di, v, low_bearing, high_bearing)
-    try
-        phi = find_zero(resultant, (low_bearing, high_bearing), xatol=0.1)
-        #println("phi: ", phi)
-        v = perf_interp(performance, min_angle(w_c_di, phi), w_c_sp, wahi, wadi)
-        if min_angle(phi, bearing) > 60.0
-            return 0.0
-        end
-        if v + cusp < 0.0
-            return 0.0
-        else
-            return v + cusp
-        end
-    catch ArgumentError
-        return 0.0
-    end
-end
-
-# this wrapper determines the performance function used in the simulation
-@fastmath cost_function(performance, cudi, cusp, widi, wisp, wadi, wahi, bearing) = cost_function_test(performance, cudi, cusp, widi, wisp, wadi, wahi, bearing)
 
 
 """Generate range of modified polars for performance uncertainty simulation."""
 function generate_performance_uncertainty_samples(polar, params, wave_m)
     unc_perf = [Performance(polar, i, 1.0, wave_m) for i in params]
 end
+
 
