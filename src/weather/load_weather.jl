@@ -1,8 +1,6 @@
 using PyCall, Interpolations
 
-machinery = PyCall.pyimport("importlib.machinery")
-loader = machinery.SourceFileLoader("weather",ENV["HOME"]*"/sail_route_old/src/weather/load_weather.py")
-w = loader.load_module("weather")
+w = pyimport("routing_helper")
 
 "Generate known weather conditions"
 function sample_weather()
