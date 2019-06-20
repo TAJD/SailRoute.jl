@@ -71,11 +71,12 @@ end
 end
 
 
-"""Convert hours in float to an index value to be added to the start index."""
+"""Convert hours in float to an index value to be added to the start index. This needs to be changed based on the weather data used."""
 @inline function convert_time(time::Float64)
-    mm = round(time*60/320)
-    return Dates.Hour(mm*3.0)
+    mm = round(time)
+    return Dates.Hour(mm)
 end
+
 
 function print_env(wisp, widi, wahi, wadi, cusp, cudi, sp)
     printfmt("Wisp {1:.2f} Widi {2:.2f} Wahi {3:.2f} Wadi {4:.2f} Cusp {5:.2f} Cudi {6:.2f} Bsp {7:.2f} \n", wisp, widi, wahi, wadi, cusp, cudi, sp)
@@ -109,15 +110,15 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
         end
         speed = cost_function(performance, cd_int, cs_int, wd_int, ws_int,
                               wadi_int, wahi_int, b)
-        if speed != Inf
+        if speed != 0.0
             earliest_times[1, idx] = d/speed
         end
     end
     @inbounds for idy in 1:idy_range-1
         @inbounds for idx1 in 1:idx_range
             if isinf(earliest_times[idy, idx1]) == false
-                @inbounds t = start_time + convert_time(earliest_times[idy, idx1])
-                t_idx = time_to_index(t, times)
+                @show t = start_time + convert_time(earliest_times[idy, idx1])
+                @show t_idx = time_to_index(t, times)
                 wd_int = widi[t_idx, idx1, idy]
                 ws_int = wisp[t_idx, idx1, idy]
                 wadi_int = wadi[t_idx, idx1, idy]
@@ -127,12 +128,14 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
                 @simd for idx2 in 1:idx_range
                     @inbounds d, b = haversine(x[idy, idx1], y[idy, idx1],
                                         x[idy+1, idx2], y[idy+1, idx2])
-                    @inbounds speed = cost_function(performance, cd_int, cs_int,
+                    speed = cost_function(performance, cd_int, cs_int,
                                                     wd_int, ws_int, wadi_int, wahi_int, b)
-                    tt = earliest_times[idy, idx1] + d/speed
-                    if earliest_times[idy+1, idx2] > tt
-                        earliest_times[idy+1, idx2] = tt
-                        prev_node[idy+1, idx2] = node_indices[idy, idx1]
+                    if speed != 0.0
+                        tt = earliest_times[idy, idx1] + d/speed
+                        if earliest_times[idy+1, idx2] > tt
+                            earliest_times[idy+1, idx2] = tt
+                            prev_node[idy+1, idx2] = node_indices[idy, idx1]
+                        end
                     end
                 end
             end
