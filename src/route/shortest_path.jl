@@ -117,8 +117,8 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
     @inbounds for idy in 1:idy_range-1
         @inbounds for idx1 in 1:idx_range
             if isinf(earliest_times[idy, idx1]) == false
-                @show t = start_time + convert_time(earliest_times[idy, idx1])
-                @show t_idx = time_to_index(t, times)
+                t = start_time + convert_time(earliest_times[idy, idx1])
+                t_idx = time_to_index(t, times)
                 wd_int = widi[t_idx, idx1, idy]
                 ws_int = wisp[t_idx, idx1, idy]
                 wadi_int = wadi[t_idx, idx1, idy]

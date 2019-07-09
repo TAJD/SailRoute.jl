@@ -75,7 +75,7 @@ Return interpolated performance. Convert from ms to knots here.
     if twa < performance.polar.itp.knots[1][1]
         return 0.0
     else
-        return performance.polar(twa, tws*1.94384)
+        return performance.polar(twa, tws)
     end 
 end
 
@@ -112,20 +112,16 @@ end
 @fastmath function cost_func(ϕ, tws, twa, cs, ca, perf)
     w_c_s, w_c_a = w_c(twa, tws, ca, cs)
     awa = min_angle(w_c_a, ϕ)
-    bsp = perf_interp(perf, awa, w_c_s)
-    return bsp
+    return perf_interp(perf, awa, w_c_s)
 end
 
 
 """Calculate the speed of the sailing craft given the current."""
 function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
-#    @show tws, twa, cs, ca
     @inline h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(wwd_to_md(ca)-bearing)
     @inline v_comp(ϕ) = p(ϕ)*cos(bearing-ϕ)
-    
     model = Model(with_optimizer(Ipopt.Optimizer,print_level=0, warm_start_init_point="yes",max_iter=30, acceptable_tol=0.2))
-    
     # variables
     @variable(model, 0.0 <= ϕ <= 360.0, start=bearing)         
     # register functions
@@ -137,7 +133,8 @@ function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     # objective function
     @NLobjective(model, Max, v_comp(ϕ))
     JuMP.optimize!(model)
-    return p(value.(ϕ))
+    #return p(value.(ϕ))
+    return v_comp(ϕ)
 end
 
 

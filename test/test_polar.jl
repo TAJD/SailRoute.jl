@@ -11,4 +11,3 @@ end
     @test ws[1] ≈ 10.0
     @test ws[2] ≈ 0.0
 end
- 
