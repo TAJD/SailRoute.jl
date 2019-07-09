@@ -119,8 +119,9 @@ end
 """Calculate the speed of the sailing craft given the current."""
 function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
-    @inline h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(wwd_to_md(ca)-bearing)
-    @inline v_comp(ϕ) = p(ϕ)*cos(bearing-ϕ)
+    ca = wwd_to_md(ca)
+    h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(ca-bearing)
+    v_comp(ϕ) = p(ϕ)*cosd(bearing-ϕ)
     model = Model(with_optimizer(Ipopt.Optimizer,print_level=0, warm_start_init_point="yes",max_iter=30, acceptable_tol=0.2))
     # variables
     @variable(model, 0.0 <= ϕ <= 360.0, start=bearing)         
@@ -133,8 +134,7 @@ function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     # objective function
     @NLobjective(model, Max, v_comp(ϕ))
     JuMP.optimize!(model)
-    #return p(value.(ϕ))
-    return v_comp(ϕ)
+    return v_comp(value.(ϕ))
 end
 
 

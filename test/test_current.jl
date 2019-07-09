@@ -12,7 +12,7 @@ function circular_performance()
 end
 
 
-@testset "Check performance interpolation" begin
+@testset "Performance interpolation" begin
     test_performance = circular_performance()
     @test sail_route.perf_interp(test_performance, 60.0, 10.0) ≈ 5.0 
     @test sail_route.perf_interp(test_performance, 60.0, 15.0) ≈ 7.5
@@ -20,10 +20,13 @@ end
 end
 
 
-@testset "Check cost function" begin
+@testset "Cost function" begin
     @test sail_route.cost_func(90.0, 10.0, 0.0, 0.0, 0.0, circular_performance()) ≈ 5.0
     @test sail_route.cost_func(90.0, 10.0, 0.0, 1.0, 0.0, circular_performance()) ≈ 5.5
 end
 
-#sp = sail_route.solve_speed_given_current(10.0, 0.0, 1.0, 0.0, 90.0, circular_performance())
-#println(sp)
+
+@testset "Speed given current solution" begin
+    @test sail_route.solve_speed_given_current(10.0, 0.0, 0.0, 0.0, 90.0, circular_performance()) ≈ 5.0
+    @test sail_route.solve_speed_given_current(10.0, 0.0, 1.0, 180.0, 90.0, circular_performance()) ≈ 5.408 atol=0.01
+end
