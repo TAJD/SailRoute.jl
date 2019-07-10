@@ -117,7 +117,7 @@ end
 
 
 """Calculate the speed of the sailing craft given the current."""
-function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
+function solve_speed_given_current(tws::Float64, twa::Float64, cs::Float64, ca::Float64, bearing::Float64, perf)
     p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
     ca = wwd_to_md(ca)
     h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(ca-bearing)
@@ -130,7 +130,8 @@ function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     register(model, :h_comp, 1, h_comp, autodiff=true)
     register(model, :v_comp, 1, v_comp, autodiff=true)                             
     # constraints
-    @NLconstraint(model, con, h_comp(ϕ)==0)                                         
+    @NLconstraint(model, con1, h_comp(ϕ)==0.0)                                         
+    @NLconstraint(model, con2, v_comp(ϕ)>=0.0)
     # objective function
     @NLobjective(model, Max, v_comp(ϕ))
     JuMP.optimize!(model)
