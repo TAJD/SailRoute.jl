@@ -57,8 +57,7 @@ end
 """Calculate the number of nodes for a specific distance in nm."""
 function calc_nodes(lon1, lon2, lat1, lat2, req_d)
     d = haversine(lon1, lon2, lat1, lat2)[1]
-    req_n = round(Int, d/req_d)
-    req_n
+    return round(Int, d/req_d)
 end
 
 
