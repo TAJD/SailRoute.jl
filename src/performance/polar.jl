@@ -135,6 +135,7 @@ function solve_speed_given_current(tws::Float64, twa::Float64, cs::Float64, ca::
     # objective function
     @NLobjective(model, Max, v_comp(ϕ))
     JuMP.optimize!(model)
+    # @show value.(ϕ), h_comp(value.(ϕ)), v_comp(value.(ϕ)), p(value.(ϕ))
     return v_comp(value.(ϕ))
 end
 
