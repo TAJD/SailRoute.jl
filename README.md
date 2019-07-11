@@ -2,7 +2,7 @@
 
 > Sailing craft route modelling, implemented in Julia.
 
-Watch me talk about some of my work (here)[https://www.youtube.com/watch?v=H9734QKifKg&t=].
+Watch me talk about some of my work [here](https://www.youtube.com/watch?v=H9734QKifKg&t=).
 
 # Installation
 
