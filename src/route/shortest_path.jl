@@ -110,7 +110,7 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
         end
         speed = cost_function(performance, cd_int, cs_int, wd_int, ws_int,
                               wadi_int, wahi_int, b)
-        if speed != 0.0
+        if speed >= 0.0
             earliest_times[1, idx] = d/speed
         end
     end
@@ -130,7 +130,8 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
                                         x[idy+1, idx2], y[idy+1, idx2])
                     speed = cost_function(performance, cd_int, cs_int,
                                                     wd_int, ws_int, wadi_int, wahi_int, b)
-                    if speed != 0.0
+                   # @show wd_int, ws_int, speed
+                    if speed >= 0.0
                         tt = earliest_times[idy, idx1] + d/speed
                         if earliest_times[idy+1, idx2] > tt
                             earliest_times[idy+1, idx2] = tt
@@ -155,7 +156,8 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
             cd_int = cudi[t_idx, idx, end]
             speed = cost_function(performance, cd_int, cs_int,
                                 wd_int, ws_int, wadi_int, wahi_int, b)
-            if speed != Inf 
+         #   @show wd_int, ws_int, speed
+            if speed >= 0.0 
                 tt = earliest_times[end, idx] + d/speed
                 if arrival_time > tt
                     arrival_time = tt
