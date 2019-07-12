@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 
-using sail_route, Test, SafeTestsets
+using SailRoute, Test, SafeTestsets
 println("Starting tests")
 
 @time @safetestset "Performance" begin include("test_polar.jl") end

@@ -1,7 +1,7 @@
-name = "sail_route"
+name = "SailRoute"
 uuid = "115e5196-f809-57df-8580-7a2e8d592fff"
 authors = ["td7g11@soton.ac.uk <tom0dickson@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

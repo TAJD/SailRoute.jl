@@ -1,4 +1,4 @@
-module sail_route
+module SailRoute
 
 export
 	generate_performance,
