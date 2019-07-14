@@ -1,4 +1,4 @@
-using CSV, Interpolations, DataFrames, Roots, Formatting, JuMP, Ipopt, Cbc
+using CSV, Interpolations, DataFrames, JuMP, Ipopt
 
 """
     awa(twa, v_s, v_t)

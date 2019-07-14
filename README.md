@@ -9,7 +9,7 @@ Watch me talk about some of my work [here](https://www.youtube.com/watch?v=H9734
 
 # Installation
 
-```] add sail_route, using sail_route```
+```] add SailRoute, using SailRoute```
 
 # Reference
 

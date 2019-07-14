@@ -1,6 +1,4 @@
-using Dates, PyCall, Formatting
-
-dt = pyimport("datetime")
+using Dates
 
 struct Route
     lon1::Float64
