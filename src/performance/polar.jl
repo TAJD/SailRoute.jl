@@ -17,7 +17,7 @@ Calculate the apparent wind angle given true wind angle, boat speed and wind spe
 # true
 # ```
 # """
-awa(twa::Float64, v_s::Float64, v_t::Float64) = atan(sind(twa)/(cosd(twa) + v_s/v_t))
+awa(twa, v_s, v_t) = atan(sind(twa)/(cosd(twa) + v_s/v_t))
 
 """
     Performance(polar, uncertainty, acceptable_failure, wave_resistance)
@@ -118,7 +118,7 @@ end
 
 
 """Calculate the speed of the sailing craft given the current."""
-function solve_speed_given_current(tws::Float64, twa::Float64, cs::Float64, ca::Float64, bearing::Float64, perf)
+function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
     p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
     ca = wwd_to_md(ca)
     h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(ca-bearing)
@@ -143,7 +143,7 @@ end
 """
 Cost function to use within routing simulation.
 """
-function cost_function(performance, cudi::Float64, cusp::Float64, widi::Float64, wisp::Float64, wadi::Float64, wahi::Float64, bearing::Float64)
+function cost_function(performance, cudi, cusp, widi, wisp, wadi, wahi, bearing)
     return solve_speed_given_current(wisp, widi, cusp, cudi, bearing, performance)
 end
 

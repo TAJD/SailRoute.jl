@@ -4,7 +4,7 @@
 
 Calculate the haversine distance and bearing. Distance is in nm.
 """
-@inline @fastmath function haversine(lon1::Float64, lat1::Float64, lon2::Float64, lat2::Float64)
+@inline @fastmath function haversine(lon1, lat1, lon2, lat2)
     R = 6372.8  # Earth radius in kilometers
 
     dLat = deg2rad(lat2 - lat1)
