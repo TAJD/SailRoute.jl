@@ -96,6 +96,7 @@ end
 @inline @fastmath wwd_to_md(x)=mod2pi(deg2rad(270.0-x))
 @inline @fastmath md_to_wwd(x)=mod(rad2deg(x)-270.0, 360.0)
 
+
 """Resolve the wind and current vectors."""
 @fastmath function w_c(twa, tws, ca, cs)
     twa = wwd_to_md(twa)
@@ -118,34 +119,29 @@ end
 
 """Calculate the speed of the sailing craft given the current."""
 function solve_speed_given_current(tws::Float64, twa::Float64, cs::Float64, ca::Float64, bearing::Float64, perf)
-    if (tws==0.0) && (twa==0.0)
-        return 0.0
-    else
-        p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
-        ca = wwd_to_md(ca)
-        h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(ca-bearing)
-        v_comp(ϕ) = p(ϕ)*cosd(bearing-ϕ)
-        model = Model(with_optimizer(Ipopt.Optimizer,print_level=0, warm_start_init_point="yes",max_iter=30, acceptable_tol=0.2))
-        # variables
-        @variable(model, 0.0 <= ϕ <= 360.0, start=bearing)         
-        # register functions
-        register(model, :p, 1, p, autodiff=true)
-        register(model, :h_comp, 1, h_comp, autodiff=true)
-        register(model, :v_comp, 1, v_comp, autodiff=true)                             
-        # constraints
-        @NLconstraint(model, con1, h_comp(ϕ)==0.0)                                         
-        @NLconstraint(model, con2, v_comp(ϕ)>=0.0)
-        # objective function
-        @NLobjective(model, Max, v_comp(ϕ))
-        JuMP.optimize!(model)
-        @show value.(ϕ), h_comp(value.(ϕ)), v_comp(value.(ϕ)), p(value.(ϕ)), tws, twa
-        return v_comp(value.(ϕ))
-    end
+    p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
+    ca = wwd_to_md(ca)
+    h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(ca-bearing)
+    v_comp(ϕ) = p(ϕ)*cosd(bearing-ϕ)
+    model = Model(with_optimizer(Ipopt.Optimizer,print_level=0, warm_start_init_point="yes",max_iter=30, acceptable_tol=0.2))
+    # variables
+    @variable(model, 0.0 <= ϕ <= 360.0, start=bearing)         
+    # register functions
+    register(model, :p, 1, p, autodiff=true)
+    register(model, :h_comp, 1, h_comp, autodiff=true)
+    register(model, :v_comp, 1, v_comp, autodiff=true)                             
+    # constraints
+    @NLconstraint(model, con1, h_comp(ϕ)==0.0)                                         
+    @NLconstraint(model, con2, v_comp(ϕ)>=0.0)
+    # objective function
+    @NLobjective(model, Max, v_comp(ϕ))
+    JuMP.optimize!(model)
+    return v_comp(value.(ϕ))
 end
 
 
 """
-Function to return speed without considering current.
+Cost function to use within routing simulation.
 """
 function cost_function(performance, cudi::Float64, cusp::Float64, widi::Float64, wisp::Float64, wadi::Float64, wahi::Float64, bearing::Float64)
     return solve_speed_given_current(wisp, widi, cusp, cudi, bearing, performance)

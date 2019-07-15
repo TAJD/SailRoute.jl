@@ -38,8 +38,6 @@ function get_locs(indx, sp, x_locs, y_locs)
     Y = []
     for k in sp[1:end-1]
         idx = findfirst(isequal(k), indx)
-        # x_locs[idx]
-        # y_locs[idx]
         append!(X, x_locs[idx])
         append!(Y, y_locs[idx])
     end
@@ -76,11 +74,6 @@ end
 end
 
 
-function print_env(wisp, widi, wahi, wadi, cusp, cudi, sp)
-    printfmt("Wisp {1:.2f} Widi {2:.2f} Wahi {3:.2f} Wadi {4:.2f} Cusp {5:.2f} Cudi {6:.2f} Bsp {7:.2f} \n", wisp, widi, wahi, wadi, cusp, cudi, sp)
-end
-
-
 "Time dependent shortest path."
 function route_solve(route::Route, performance::Performance, start_time::DateTime, times, x, y, wisp, widi, wadi, wahi, cusp, cudi)
     start_time_idx = time_to_index(start_time, times)
@@ -93,7 +86,7 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
     idx_range = size(x)[2]
     idy_range = size(x)[1]
     @simd for idx in 1:idx_range
-        @inbounds d, b = haversine(route.lon1, route.lat1, x[1, idx], y[1, idx])
+        d, b = haversine(route.lon1, route.lat1, x[1, idx], y[1, idx])
         wd_int = widi[start_time_idx, idx, 1]
         ws_int = wisp[start_time_idx, idx, 1]
         cs_int = cusp[start_time_idx, idx, 1]
@@ -112,8 +105,8 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
             earliest_times[1, idx] = d/speed
         end
     end
-    @inbounds for idy in 1:idy_range-1
-        @inbounds for idx1 in 1:idx_range
+    for idy in 1:idy_range-1
+        for idx1 in 1:idx_range
             if isinf(earliest_times[idy, idx1]) == false
                 t = start_time + convert_time(earliest_times[idy, idx1])
                 t_idx = time_to_index(t, times)
@@ -124,7 +117,7 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
                 cs_int = cusp[t_idx, idx1, idy]
                 cd_int = cudi[t_idx, idx1, idy]
                 @simd for idx2 in 1:idx_range
-                    @inbounds d, b = haversine(x[idy, idx1], y[idy, idx1],
+                    d, b = haversine(x[idy, idx1], y[idy, idx1],
                                         x[idy+1, idx2], y[idy+1, idx2])
                     speed = cost_function(performance, cd_int, cs_int,
                                                     wd_int, ws_int, wadi_int, wahi_int, b)
@@ -140,7 +133,7 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
         end
     end
     
-    @inbounds @simd for idx in 1:idx_range
+    @simd for idx in 1:idx_range
         if isinf(earliest_times[end, idx]) == false
             d, b = haversine(x[end, idx], y[end, idx], route.lon2, route.lat2)
             t = start_time + convert_time(earliest_times[end, idx])
