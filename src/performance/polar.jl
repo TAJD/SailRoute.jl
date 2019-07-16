@@ -61,7 +61,7 @@ Return interpolation object.
 function setup_perf_interpolation(tws, twa, perf)
     knots = (twa, tws)
     itp = interpolate(knots, perf, Gridded(Linear()))
-    etp0 = extrapolate(itp, Line())
+    etp0 = extrapolate(itp, Flat())
     return etp0
 end
 
@@ -71,11 +71,16 @@ functionterp(itp, twa, tws)
 
 Return interpolated performance. Convert from ms to knots here.
 """
-@inline @fastmath function perf_interp(performance::Performance, twa, tws)
+@fastmath function perf_interp(performance::Performance, twa, tws)
     if twa < performance.polar.itp.knots[1][1]
         return 0.0
     else
-        return performance.polar(twa, tws)
+        v = performance.polar(twa, tws)*performance.uncertainty
+        if v > 0.0
+            return v
+        else
+            return 0
+        end
     end 
 end
 
