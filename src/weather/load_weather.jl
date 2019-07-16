@@ -125,7 +125,7 @@ function return_current_vectors(y, t_length)
         cusp[i, :, :] = r.(y)
         cudi[i, :, :] = theta.(y)
     end
-    return cusp, cudi
+    return Float32.(cusp), Float32.(cudi)
 end
 
 

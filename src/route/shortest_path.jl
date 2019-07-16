@@ -10,12 +10,6 @@ struct Route
 end
 
 
-"""Check if an array is monotonic. Works for both directions."""
-function check_monotonic(array)                                                  
-    return all(array[i] .> array[i+1] for i in range(1, length=length(array)-1))
-end
-
-
 """Identify the shortest path given arrays of locations and an array of the earliest time at each point."""
 function shortest_path(indx, pindx, sp)
     ix = findfirst(isequal(sp[end]), indx)
@@ -42,17 +36,6 @@ function get_locs(indx, sp, x_locs, y_locs)
         append!(Y, y_locs[idx])
     end
     return hcat(X, Y) 
-end
-
-
-"""Get the earliest times for a given path"""
-function get_path_et(indx, sp, earliest_times)
-    ET = []
-    for k in sp[1:end-1]
-        idx = findfirst(isequal(k), indx)
-        append!(ET, earliest_times[idx])
-    end
-    return ET
 end
 
 
