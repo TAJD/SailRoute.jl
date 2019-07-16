@@ -92,8 +92,8 @@ function load_current_data()
     path = ENV["HOME"]*"/sail_route_old/development/polynesian/current_data/"
     m_path = path*"meridional.csv"
     z_path = path*"zonal.csv"
-    meridional = convert(Matrix{Float64}, CSV.read(m_path, delim=',', datarow=1))
-    zonal = convert(Matrix{Float64}, CSV.read(z_path, delim=',', datarow=1))
+    meridional = convert(Matrix{Float32}, CSV.read(m_path, delim=',', datarow=1))
+    zonal = convert(Matrix{Float32}, CSV.read(z_path, delim=',', datarow=1))
     meridional[:, 1] *= (0.01*1.9438444924406)
     zonal[:, 1] *= (0.01*1.9438444924406)
     meridional = meridional[end:-1:1, :]

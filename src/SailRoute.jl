@@ -1,9 +1,5 @@
 module SailRoute
 
-export
-	generate_performance,
-	awa
-
 include("uncertainty/discretization_error.jl")
 include("route/domain.jl")
 include("performance/polar.jl")

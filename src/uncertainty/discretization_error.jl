@@ -119,35 +119,6 @@ function asymptotic_ratio(gci_fine_21, gci_fine_32, ratio_21, p)
 end
 
 
-function apply_routine(print=false)
-    value_1 = 0.970500
-    value_2 = 0.968540
-    value_3 = 0.961780
-    h1 = 1.0
-    h2 = 2.0
-    h3 = 4.0
-    ratio_21 = h2/h1
-    ratio_32 = h3/h2
-    ooc = order_of_convergence(value_1, value_2, value_3, ratio_21, ratio_32)
-    f_exact_21 = richardson_extrapolate(value_1, value_2, ratio_21, ooc)
-    f_exact_32 = richardson_extrapolate(value_2, value_3, ratio_32, ooc)
-    e21a, e21ext = error_estimates(value_1, value_2, f_exact_21)
-    e32a, e32ext = error_estimates(value_2, value_3, f_exact_32)
-    gci_fine_21, gci_coarse_21 = gci(ratio_21, e21a, ooc)
-    gci_fine_32, gci_coarse_32 = gci(ratio_32, e32a, ooc)
-    ratio = asymptotic_ratio(gci_fine_21, gci_fine_32, ratio_21, ooc)
-
-    if print==true
-        println("Order of convergence: ", ooc)
-        println("Richardson extrapolation: ", f_exact_21)
-        println("Approximate error:  ", e21a)
-        println("Extrapolated error: ", e21ext)
-        println("Asymptotic ratio", ratio)
-    end
-    return ooc, f_exact_21, e21a, e21ext, gci_fine_21, gci_coarse_21, ratio
-end
-
-
 """Return the fine GCI value"""
 function GCI_calc(value_1, value_2, value_3, h1, h2, h3)
     ratio_21 = h2/h1
