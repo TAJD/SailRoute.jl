@@ -40,8 +40,8 @@ end
 
 function generate_grid(start_lon, start_lat, finish_lon, finish_lat, nodes)
     dist = haversine(start_lon, start_lat, finish_lon, finish_lat)
-    spacing = dist/(nodes+1)
-    alpha = atan(finish_lat-start_lat, finish_lon-start_lon)
+    spacing = dist[1]/(nodes+1)
+    alpha = dist[2]
     x_dist = spacing
     y_dist = spacing
     grid_x = reshape(start_lon.+[i*x_dist for i in range(1, length=nodes) for j in range(0, length=nodes).-(nodes-1)/2], (nodes, nodes))
