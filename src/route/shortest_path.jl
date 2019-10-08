@@ -140,8 +140,8 @@ function route_solve(route::Route, performance::Performance, start_time::DateTim
     end
     sp = shortest_path(node_indices, prev_node, [final_node])
     locs = get_locs(node_indices, sp, x, y)
-    x_path = vcat([start_lon], locs[:, 1], [finish_lon])
-    y_path = vcat([start_lat], locs[:, 2], [finish_lat])
+    x_path = vcat([route.lon1], locs[:, 1], [route.lon2])
+    y_path = vcat([route.lat1], locs[:, 2], [route.lat2])
     locs = hcat(x_path, y_path)
     return arrival_time, locs, earliest_times
 end
