@@ -22,6 +22,35 @@ Calculate the haversine distance and bearing. Distance is in nm.
 end
 
 
+function rotate_point(ox, oy, px, py, angle,ret_x)
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    qx = ox + cos(angle) * (px - ox) - sin(angle) * (py - oy)
+    qy = oy + sin(angle) * (px - ox) + cos(angle) * (py - oy)
+    if ret_x == true
+        return qx
+    else
+        return qy
+    end
+end
+
+
+function generate_grid(start_lon, start_lat, finish_lon, finish_lat, nodes)
+    dist = haversine(start_lon, start_lat, finish_lon, finish_lat)
+    spacing = dist/(nodes+1)
+    alpha = atan(finish_lat-start_lat, finish_lon-start_lon)
+    x_dist = spacing
+    y_dist = spacing
+    grid_x = reshape(start_lon.+[i*x_dist for i in range(1, length=nodes) for j in range(0, length=nodes).-(nodes-1)/2], (nodes, nodes))
+    grid_y = reshape(start_lat.+[j*y_dist for i in range(1, length=nodes) for j in range(0, length=nodes).-(nodes-1)/2], (nodes, nodes))
+    rot_grid_x = [rotate_point(start_lon, start_lat, x, y, alpha, true) for (x, y) in zip(grid_x,grid_y)]
+    rot_grid_y = [rotate_point(start_lon, start_lat, x, y, alpha, false) for (x, y) in zip(grid_x,grid_y)]
+    return rot_grid_x, rot_grid_y
+end
+
 
 """
     euclidean(x1, y1, x2, y2)
