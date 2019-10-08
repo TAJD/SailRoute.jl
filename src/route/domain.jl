@@ -48,7 +48,7 @@ function generate_grid(start_lon, start_lat, finish_lon, finish_lat, nodes)
     grid_y = reshape(start_lat.+[j*y_dist for i in range(1, length=nodes) for j in range(0, length=nodes).-(nodes-1)/2], (nodes, nodes))
     rot_grid_x = [rotate_point(start_lon, start_lat, x, y, alpha, true) for (x, y) in zip(grid_x,grid_y)]
     rot_grid_y = [rotate_point(start_lon, start_lat, x, y, alpha, false) for (x, y) in zip(grid_x,grid_y)]
-    return rot_grid_x, rot_grid_y
+    return transpose(rot_grid_x), rot_grid_y
 end
 
 
