@@ -92,7 +92,7 @@ end
 
 """Generic Aerrtsen typical speed loss values. Needs to be made more specific."""
 function typical_aerrtsen()
-    itp = interpolate(([0.2, 0.6, 1.5, 2.3, 4.2, 8.2],), [100.0, 99.0, 97.0, 94.0, 83.0, 60.0], Gridded(Linear()))
+    itp = interpolate(([0.2, 0.6, 1.5, 2.3, 4.2, 8.2],), [1.0, 0.99, 0.97, 0.94, 0.83, 0.60], Gridded(Linear()))
     etp = extrapolate(itp, Line())
     return etp
 end
@@ -115,16 +115,16 @@ end
 
 
 """Return the speed of a sailing craft"""
-@fastmath function cost_func(ϕ, tws, twa, cs, ca, perf)
+@fastmath function cost_func(ϕ, tws, twa, cs, ca, wahi, perf)
     w_c_s, w_c_a = w_c(twa, tws, ca, cs)
     awa = min_angle(w_c_a, ϕ)
-    return perf_interp(perf, awa, w_c_s)
+    return perf_interp(perf, awa, w_c_s)*perf.wave_resistance(wahi)
 end
 
 
 """Calculate the speed of the sailing craft given the current."""
-function solve_speed_given_current(tws, twa, cs, ca, bearing, perf)
-    p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, perf)
+function solve_speed_given_current(tws, twa, cs, ca, wahi, bearing, perf)
+    p(ϕ) = cost_func(ϕ, tws, twa, cs, ca, wahi, perf)
     ca = wwd_to_md(ca)
     h_comp(ϕ) = p(ϕ)*sind(bearing-ϕ)-cs*sind(ca-bearing)
     v_comp(ϕ) = p(ϕ)*cosd(bearing-ϕ)
@@ -149,7 +149,7 @@ end
 Cost function to use within routing simulation.
 """
 function cost_function(performance, cudi, cusp, widi, wisp, wadi, wahi, bearing)
-    return solve_speed_given_current(wisp, widi, cusp, cudi, bearing, performance)
+    return solve_speed_given_current(wisp, widi, cusp, cudi, wahi, bearing, performance)
 end
 
 
